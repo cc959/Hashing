@@ -1,0 +1,6 @@
+{
+	"files.associations": {
+		"*.soitask": "stoml",
+		"chrono": "cpp"
+	}
+}

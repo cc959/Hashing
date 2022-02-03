@@ -6,6 +6,9 @@
 #define uchar uint8_t
 
 using namespace std;
+using namespace this_thread;	 // sleep_for, sleep_until
+using namespace chrono_literals; // ns, us, ms, s, h, etc.
+using chrono::system_clock;
 
 // first 32 bits of the fractional parts of the square roots of the first 8 primes: 2, 3, 5, 7, 11, 13, 17, 19
 vector<uint> h = {0x6a09e667, 0xbb67ae85, 0x3c6ef372, 0xa54ff53a, 0x510e527f, 0x9b05688c, 0x1f83d9ab, 0x5be0cd19};
@@ -20,12 +23,11 @@ vector<uint> k = {0x428a2f98, 0x71374491, 0xb5c0fbcf, 0xe9b5dba5, 0x3956c25b, 0x
 				  0x19a4c116, 0x1e376c08, 0x2748774c, 0x34b0bcb5, 0x391c0cb3, 0x4ed8aa4a, 0x5b9cca4f, 0x682e6ff3,
 				  0x748f82ee, 0x78a5636f, 0x84c87814, 0x8cc70208, 0x90befffa, 0xa4506ceb, 0xbef9a3f7, 0xc67178f2};
 
-// right -> positive  left -> negative
-template <class T>
-T rotate(T in, int d)
+vector<char> hexChars{'0', '1', '2', '3', '4', '5', '6', '7', '8', '9', 'a', 'b', 'c', 'd', 'e', 'f'};
+
+uint32_t rotate(uint32_t x, uint32_t n)
 {
-	// d %= 8 * sizeof(T);
-	return (in >> d) | (in << (8 * sizeof(T) - d));
+	return (x >> n) | (x << (32 - n));
 }
 
 template <class T, class U>
@@ -43,7 +45,7 @@ vector<U> convert(vector<T> in)
 		int i = 0;
 		for (int k = 0; k < in.size(); k++)
 			for (int j = 0; j < m; j++, i++)
-				out[n - i - 1] = U(in[k] / (1LL << 8 * b * i) % (1LL << 8 * b));
+				out[i] = U(in[k] / (1LL << 8 * b * (m - j - 1)) % (1LL << 8 * b));
 
 		return out;
 	}
@@ -69,16 +71,25 @@ vector<U> convert(vector<T> in)
 	}
 }
 
-int main()
+template <class T>
+string toHex(vector<T> in)
 {
-	vector<uchar> data;
-	char c;
-	while (cin.get(c))
-		data.push_back(reinterpret_cast<uchar &>(c));
+	auto a = convert<T, uchar>(in);
+	string out;
+	for (int i = 0; i < a.size(); i++)
+	{
+		out.push_back(hexChars[a[i] >> 4]);
+		out.push_back(hexChars[a[i] % 16]);
+	}
+	return out;
+}
+
+string sha256(vector<uchar> data)
+{
 
 	ull size = data.size() * 8;
 
-	data.push_back(0b1000000);
+	data.push_back(0b10000000);
 
 	while ((data.size() + 8) % 64)
 		data.push_back(0b00000000);
@@ -96,7 +107,7 @@ int main()
 		{
 			uint s0 = rotate(w[j - 15], 7) ^ rotate(w[j - 15], 18) ^ (w[j - 15] >> 3);
 			uint s1 = rotate(w[j - 2], 17) ^ rotate(w[j - 2], 19) ^ (w[j - 2] >> 10);
-			w[j] = w[j - 16] + s0 + w[j - 7] + s1;
+			w[j] = s1 + w[j - 7] + s0 + w[j - 16];
 		}
 
 		auto a = h;
@@ -124,7 +135,28 @@ int main()
 			h[i] += a[i];
 	}
 
-	for (int i = 0; i < 8; i++)
-		cout << bitset<32>(h[i]);
+	string hash = toHex(h);
+	h = {0x6a09e667, 0xbb67ae85, 0x3c6ef372, 0xa54ff53a, 0x510e527f, 0x9b05688c, 0x1f83d9ab, 0x5be0cd19};
+	return hash;
+}
+
+int main(int argc, char *argv[])
+{
+
+	if (argc == 1)
+		return 0;
+
 	cout << "\n";
+	do
+	{
+		ifstream f(argv[1]);
+		vector<uchar> data;
+		char c;
+		while (f.get(c))
+			data.push_back(reinterpret_cast<uchar &>(c));
+		cout << "\e[1A\e[K" << sha256(data) << "\n";
+
+		if (argc == 3)
+			sleep_for(chrono::milliseconds(stoi(argv[2])));
+	} while (argc == 3);
 }

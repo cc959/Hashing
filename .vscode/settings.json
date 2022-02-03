@@ -1,6 +1,7 @@
 {
 	"files.associations": {
 		"*.soitask": "stoml",
-		"chrono": "cpp"
+		"chrono": "cpp",
+		"iosfwd": "cpp"
 	}
 }

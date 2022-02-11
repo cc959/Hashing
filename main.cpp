@@ -142,7 +142,7 @@ void push(vector<uchar> &data, uchar x)
 	}
 }
 
-string sha256(ifstream &f)
+string sha256(istream &f)
 {
 
 	vector<uchar> data;
@@ -176,25 +176,37 @@ string sha256(ifstream &f)
 	return hash;
 }
 
-int main(int argc, char *argv[])
+int main()
 {
-	// u stoopid
-	if (argc == 1)
-		return 0;
+	// const char *c = (const char *)&b;
 
-	cout << "\n";
-	while (true)
-	{
-		// open a file stream to the input
-		ifstream f(argv[1]);
+	// vector<uchar> data = {};
 
-		// clear the last line and print the hash
-		cout << "\e[1A\e[K" << sha256(f) << "\n";
+	// stringstream str;
+	// str.write((const char *)&data[0], data.size());
 
-		// wait a bit
-		if (argc == 3)
-			sleep_for(chrono::milliseconds(stoi(argv[2])));
-		else
-			break;
-	}
+	// cout << sha256(str) << "\n";
 }
+
+// int main(int argc, char *argv[])
+// {
+// 	// u stoopid
+// 	if (argc == 1)
+// 		return 0;
+
+// 	cout << "\n";
+// 	while (true)
+// 	{
+// 		// open a file stream to the input
+// 		ifstream f(argv[1]);
+
+// 		// clear the last line and print the hash
+// 		cout << "\e[1A\e[K" << sha256(f) << "\n";
+
+// 		// wait a bit
+// 		if (argc == 3)
+// 			sleep_for(chrono::milliseconds(stoi(argv[2])));
+// 		else
+// 			break;
+// 	}
+// }

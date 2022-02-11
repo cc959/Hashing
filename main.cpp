@@ -176,37 +176,25 @@ string sha256(istream &f)
 	return hash;
 }
 
-int main()
+int main(int argc, char *argv[])
 {
-	// const char *c = (const char *)&b;
+	// u stoopid
+	if (argc == 1)
+		return 0;
 
-	// vector<uchar> data = {};
+	cout << "\n";
+	while (true)
+	{
+		// open a file stream to the input
+		ifstream f(argv[1]);
 
-	// stringstream str;
-	// str.write((const char *)&data[0], data.size());
+		// clear the last line and print the hash
+		cout << "\e[1A\e[K" << sha256(f) << "\n";
 
-	// cout << sha256(str) << "\n";
+		// wait a bit
+		if (argc == 3)
+			sleep_for(chrono::milliseconds(stoi(argv[2])));
+		else
+			break;
+	}
 }
-
-// int main(int argc, char *argv[])
-// {
-// 	// u stoopid
-// 	if (argc == 1)
-// 		return 0;
-
-// 	cout << "\n";
-// 	while (true)
-// 	{
-// 		// open a file stream to the input
-// 		ifstream f(argv[1]);
-
-// 		// clear the last line and print the hash
-// 		cout << "\e[1A\e[K" << sha256(f) << "\n";
-
-// 		// wait a bit
-// 		if (argc == 3)
-// 			sleep_for(chrono::milliseconds(stoi(argv[2])));
-// 		else
-// 			break;
-// 	}
-// }
